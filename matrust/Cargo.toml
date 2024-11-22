@@ -1,0 +1,27 @@
+[package]
+name = "matrust"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "matrust"
+test = false
+
+[dependencies]
+anyhow = { workspace = true }
+tower = { version = "0.4", features = ["full"] }
+tokio = { version = "1", features = ["full"] }
+url = "2.5.0"
+matrix-sdk = { path = "../matrix-rust-sdk/crates/matrix-sdk", features = [
+    "sso-login",
+] }
+slint = "1.8.0"
+
+[lints]
+workspace = true
+
+[package.metadata.release]
+release = false
+
+[build-dependencies]
+slint-build = "1.8.0"
