@@ -1,5 +1,7 @@
 use std::{
-    env, fmt,
+    env,
+    error::Error,
+    fmt,
     io::{self, Write},
     process::exit,
 };
@@ -23,19 +25,25 @@ const INITIAL_DEVICE_DISPLAY_NAME: &str = "login client";
 ///
 /// Homeservers usually offer to login either via password, Single Sign-On (SSO)
 /// or both.
+/// use std::error::Error;
 
-slint::slint!{
-    export component HelloWorld {
-        Text {
-            text: "hello world";
-            color: green;
-        }
-    }
-}
+slint::include_modules!();
+
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     //tracing_subscriber::fmt::init();
-    HelloWorld::new().unwrap().run().unwrap();
+    let ui = AppWindow::new().expect("Failed to create AppWindow");
+
+    ui.on_request_increase_value({
+        let ui_handle = ui.as_weak();
+        move || {
+            let ui = ui_handle.unwrap();
+            ui.set_counter(ui.get_counter() + 1);
+        }
+    });
+
+    ui.run()?;
+
     let Some(homeserver_url) = env::args().nth(1) else {
         eprintln!("Usage: {} <homeserver_url>", env::args().next().unwrap());
         exit(1)
@@ -77,7 +85,11 @@ async fn login_and_sync(homeserver_url: String) -> anyhow::Result<()> {
     }
 
     match choices.len() {
-        0 => return Err(anyhow!("Homeserver login types incompatible with this client")),
+        0 => {
+            return Err(anyhow!(
+                "Homeserver login types incompatible with this client"
+            ))
+        }
         1 => choices[0].login(&client).await?,
         _ => offer_choices_and_login(&client, choices).await?,
     }
@@ -135,7 +147,9 @@ async fn offer_choices_and_login(client: &Client, choices: Vec<LoginChoice>) -> 
         print!("\nEnter your choice: ");
         io::stdout().flush().expect("Unable to write to stdout");
         let mut choice_str = String::new();
-        io::stdin().read_line(&mut choice_str).expect("Unable to read user input");
+        io::stdin()
+            .read_line(&mut choice_str)
+            .expect("Unable to read user input");
 
         match choice_str.trim().parse::<usize>() {
             Ok(choice) => {
@@ -162,13 +176,17 @@ async fn login_with_password(client: &Client) -> anyhow::Result<()> {
         print!("\nUsername: ");
         io::stdout().flush().expect("Unable to write to stdout");
         let mut username = String::new();
-        io::stdin().read_line(&mut username).expect("Unable to read user input");
+        io::stdin()
+            .read_line(&mut username)
+            .expect("Unable to read user input");
         username = username.trim().to_owned();
 
         print!("Password: ");
         io::stdout().flush().expect("Unable to write to stdout");
         let mut password = String::new();
-        io::stdin().read_line(&mut password).expect("Unable to read user input");
+        io::stdin()
+            .read_line(&mut password)
+            .expect("Unable to read user input");
         password = password.trim().to_owned();
 
         match client
