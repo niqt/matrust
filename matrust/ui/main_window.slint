@@ -1,17 +1,36 @@
-import { Button, VerticalBox } from "std-widgets.slint";
+import { Button, VerticalBox, LineEdit } from "std-widgets.slint";
 
 export component AppWindow inherits Window {
-    in-out property <int> counter: 42;
-    callback request-increase-value();
-    VerticalBox {
-        Text {
-            text: "Counter: \{root.counter}";
-        }
+    width: 400px;
+    height: 400px;
+    title: "Matrust";
+    VerticalLayout {
+        padding: 5px;
+        spacing: 10px;
+        alignment: center;
 
+        LineEdit {
+            font-size: 14px;
+            width: 300px;
+            height: 30px;
+            text: "";
+            placeholder-text: "Username";
+        }
+        LineEdit {
+            font-size: 14px;
+            width: 300px;
+            height: 30px;
+            placeholder-text: "password";
+            text: "";
+            input-type: password;
+        }
         Button {
-            text: "Increase value";
+            text: "Login";
+            width: 50px;
+            height: 30px;
+
             clicked => {
-                root.request-increase-value();
+
             }
         }
     }

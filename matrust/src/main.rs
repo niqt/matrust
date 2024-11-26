@@ -34,14 +34,6 @@ async fn main() -> anyhow::Result<()> {
     //tracing_subscriber::fmt::init();
     let ui = AppWindow::new().expect("Failed to create AppWindow");
 
-    ui.on_request_increase_value({
-        let ui_handle = ui.as_weak();
-        move || {
-            let ui = ui_handle.unwrap();
-            ui.set_counter(ui.get_counter() + 1);
-        }
-    });
-
     ui.run()?;
 
     let Some(homeserver_url) = env::args().nth(1) else {
