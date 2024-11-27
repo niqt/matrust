@@ -11,26 +11,28 @@ export component AppWindow inherits Window {
 
         LineEdit {
             font-size: 14px;
-            width: 300px;
+            min-width: parent.width;
             height: 30px;
             text: "";
             placeholder-text: "Username";
         }
         LineEdit {
             font-size: 14px;
-            width: 300px;
             height: 30px;
-            placeholder-text: "password";
+            placeholder-text: "Password";
             text: "";
             input-type: password;
+            min-width: parent.width;
         }
-        Button {
-            text: "Login";
-            width: 50px;
-            height: 30px;
+        HorizontalLayout {
+            alignment: center;
+            Button {
+                text: "Login";
+                width: 50px;
+                height: 30px;
+                clicked => {
 
-            clicked => {
-
+                }
             }
         }
     }
