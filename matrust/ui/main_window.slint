@@ -4,19 +4,20 @@ export component AppWindow inherits Window {
     width: 400px;
     height: 400px;
     title: "Matrust";
+    callback login(string, string);
     VerticalLayout {
         padding: 5px;
         spacing: 10px;
         alignment: center;
 
-        LineEdit {
+        userEdit := LineEdit {
             font-size: 14px;
             min-width: parent.width;
             height: 30px;
             text: "";
             placeholder-text: "Username";
         }
-        LineEdit {
+        passwordEdit := LineEdit {
             font-size: 14px;
             height: 30px;
             placeholder-text: "Password";
@@ -31,7 +32,7 @@ export component AppWindow inherits Window {
                 width: 50px;
                 height: 30px;
                 clicked => {
-
+                    login(userEdit.text, passwordEdit.text)
                 }
             }
         }
