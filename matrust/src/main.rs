@@ -31,26 +31,57 @@ slint::include_modules!();
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    //tracing_subscriber::fmt::init();
     let ui = AppWindow::new().expect("Failed to create AppWindow");
-
     ui.on_login({
-        let ui_handle = ui.as_weak();
+        //let ui_handle = ui.as_weak();
         move |username, password| {
-            let ui = ui_handle.unwrap();
-            println!("user {username}");
-            //ui.set_counter(ui.get_counter() + 1);
+            //let ui = ui_handle.unwrap();
+            
+            tokio::spawn(async move {
+                let url = "https://matrix.org".to_string();
+                match login_and_sync_with_password(url, username.to_string(), password.to_string()).await {
+                    Ok(_) => {
+                        // Handle successful login
+                        println!("Login successful");
+                        // You might want to update UI here if needed
+                    },
+                    Err(e) => {
+                        // Handle login error
+                        println!("Login failed: {}", e);
+                    }
+                }
+            });
         }
     });
     ui.run()?;
+    Ok(())
+}
 
-    let Some(homeserver_url) = env::args().nth(1) else {
-        eprintln!("Usage: {} <homeserver_url>", env::args().next().unwrap());
-        exit(1)
-    };
+async fn login_and_sync_with_password(homeserver_url: String, username: String, password: String) -> anyhow::Result<()> {
+    println!("Logging in with username and password…");
+    let homeserver_url = Url::parse(&homeserver_url)?;
+    println!("Logging in with username and password…");
+    let client = Client::new(homeserver_url).await?;
 
-    login_and_sync(homeserver_url).await?;
+    println!("Logging in with username and password…");
 
+    loop {
+        match client
+            .matrix_auth()
+            .login_username(&username, &password)
+            .initial_device_display_name(INITIAL_DEVICE_DISPLAY_NAME)
+            .await
+        {
+            Ok(_) => {
+                println!("Logged in as {username}");
+                break;
+            }
+            Err(error) => {
+                println!("Error logging in: {error}");
+                println!("Please try again\n");
+            }
+        }
+    }
     Ok(())
 }
 
