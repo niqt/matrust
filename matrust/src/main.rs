@@ -12,6 +12,7 @@ use matrix_sdk::{
     ruma::{
         api::client::session::get_login_types::v3::{IdentityProvider, LoginType},
         events::room::message::{MessageType, OriginalSyncRoomMessageEvent},
+        {user_id, events::room::message::SyncRoomMessageEvent},
     },
     Client, Room, RoomState,
 };
@@ -40,10 +41,19 @@ async fn main() -> anyhow::Result<()> {
             tokio::spawn(async move {
                 let url = "https://matrix.org".to_string();
                 match login_and_sync_with_password(url, username.to_string(), password.to_string()).await {
-                    Ok(_) => {
+                    Ok(client) => {
                         // Handle successful login
                         println!("Login successful");
                         // You might want to update UI here if needed
+                        // Now that we are logged in, we can sync and listen to new messages.
+                        client.add_event_handler(|ev: SyncRoomMessageEvent| async move {
+                            println!("Received a message {:?}", ev);
+                        });
+                        client.add_event_handler(on_room_message);
+                        // This will sync until an error happens or the program is killed.
+                        if let Err(e) = client.sync(SyncSettings::default()).await {
+                            eprintln!("Sync error: {}", e);
+                        }
                     },
                     Err(e) => {
                         // Handle login error
@@ -57,13 +67,9 @@ async fn main() -> anyhow::Result<()> {
     Ok(())
 }
 
-async fn login_and_sync_with_password(homeserver_url: String, username: String, password: String) -> anyhow::Result<()> {
-    println!("Logging in with username and password…");
+async fn login_and_sync_with_password(homeserver_url: String, username: String, password: String) -> anyhow::Result<(Client)> {
     let homeserver_url = Url::parse(&homeserver_url)?;
-    println!("Logging in with username and password…");
     let client = Client::new(homeserver_url).await?;
-
-    println!("Logging in with username and password…");
 
     loop {
         match client
@@ -82,7 +88,7 @@ async fn login_and_sync_with_password(homeserver_url: String, username: String, 
             }
         }
     }
-    Ok(())
+    Ok(client)
 }
 
 /// Log in to the given homeserver and sync.
@@ -266,6 +272,7 @@ async fn login_with_sso(client: &Client, idp: Option<&IdentityProvider>) -> anyh
 /// Handle room messages by logging them.
 async fn on_room_message(event: OriginalSyncRoomMessageEvent, room: Room) {
     // We only want to listen to joined rooms.
+    println!("In on_room_message");
     if room.state() != RoomState::Joined {
         return;
     }
