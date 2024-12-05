@@ -8,14 +8,15 @@ use std::{
 
 use anyhow::anyhow;
 use matrix_sdk::{
-    config::SyncSettings,
+    config::SyncSettings, ruma::events::room::member::StrippedRoomMemberEvent, Client, Room,
     ruma::{
         api::client::session::get_login_types::v3::{IdentityProvider, LoginType},
         events::room::message::{MessageType, OriginalSyncRoomMessageEvent},
         {user_id, events::room::message::SyncRoomMessageEvent},
     },
-    Client, Room, RoomState,
+    RoomState,
 };
+use tokio::time::{sleep, Duration};
 use url::Url;
 
 /// The initial device name when logging in with a device for the first time.
@@ -33,13 +34,13 @@ slint::include_modules!();
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     let ui = AppWindow::new().expect("Failed to create AppWindow");
-    ui.on_login({
+    /*ui.on_login({
         //let ui_handle = ui.as_weak();
-        move |username, password| {
-            //let ui = ui_handle.unwrap();
-            
+        move |server, username, password| {
+            //let ui = ui_handle.unwrap()
+
             tokio::spawn(async move {
-                let url = "https://matrix.org".to_string();
+                let url = server.to_string();
                 match login_and_sync_with_password(url, username.to_string(), password.to_string()).await {
                     Ok(client) => {
                         // Handle successful login
@@ -50,10 +51,12 @@ async fn main() -> anyhow::Result<()> {
                             println!("Received a message {:?}", ev);
                         });
                         client.add_event_handler(on_room_message);
+                        client.add_event_handler(on_stripped_state_member);
                         // This will sync until an error happens or the program is killed.
                         if let Err(e) = client.sync(SyncSettings::default()).await {
                             eprintln!("Sync error: {}", e);
                         }
+                        println!("Exiting");
                     },
                     Err(e) => {
                         // Handle login error
@@ -62,9 +65,42 @@ async fn main() -> anyhow::Result<()> {
                 }
             });
         }
-    });
+    });*/
+
     ui.run()?;
     Ok(())
+}
+
+async fn on_stripped_state_member(
+    room_member: StrippedRoomMemberEvent,
+    client: Client,
+    room: Room,
+) {
+    println!("sono in stripped");
+    if room_member.state_key != client.user_id().unwrap() {
+        return;
+    }
+
+    tokio::spawn(async move {
+        println!("Autojoining room {}", room.room_id());
+        let mut delay = 2;
+
+        while let Err(err) = room.join().await {
+            // retry autojoin due to synapse sending invites, before the
+            // invited user can join for more information see
+            // https://github.com/matrix-org/synapse/issues/4345
+            eprintln!("Failed to join room {} ({err:?}), retrying in {delay}s", room.room_id());
+
+            sleep(Duration::from_secs(delay)).await;
+            delay *= 2;
+
+            if delay > 3600 {
+                eprintln!("Can't join room {} ({err:?})", room.room_id());
+                break;
+            }
+        }
+        println!("Successfully joined room {}", room.room_id());
+    });
 }
 
 async fn login_and_sync_with_password(homeserver_url: String, username: String, password: String) -> anyhow::Result<(Client)> {
@@ -277,11 +313,13 @@ async fn on_room_message(event: OriginalSyncRoomMessageEvent, room: Room) {
         return;
     }
 
+    println!("In on_room_message2");
     // We only want to log text messages.
     let MessageType::Text(msgtype) = &event.content.msgtype else {
         return;
     };
 
+    println!("In on_room_message3");
     let member = room
         .get_member(&event.sender)
         .await

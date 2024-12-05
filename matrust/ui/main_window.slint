@@ -1,40 +1,14 @@
 import { Button, VerticalBox, LineEdit } from "std-widgets.slint";
+import { LoginWindow } from "login_window.slint";
 
 export component AppWindow inherits Window {
-    width: 400px;
-    height: 400px;
+    width: 800px;
+    height: 800px;
     title: "Matrust";
-    callback login(string, string);
     VerticalLayout {
-        padding: 5px;
-        spacing: 10px;
         alignment: center;
+        LoginWindow {
 
-        userEdit := LineEdit {
-            font-size: 14px;
-            min-width: parent.width;
-            height: 30px;
-            text: "";
-            placeholder-text: "Username";
-        }
-        passwordEdit := LineEdit {
-            font-size: 14px;
-            height: 30px;
-            placeholder-text: "Password";
-            text: "";
-            input-type: password;
-            min-width: parent.width;
-        }
-        HorizontalLayout {
-            alignment: center;
-            Button {
-                text: "Login";
-                width: 50px;
-                height: 30px;
-                clicked => {
-                    login(userEdit.text, passwordEdit.text)
-                }
-            }
         }
     }
 }
