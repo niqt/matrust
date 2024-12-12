@@ -1,13 +1,18 @@
 import { Button, VerticalBox, LineEdit } from "std-widgets.slint";
 import { LoginWindow } from "login_window.slint";
 
+import {LoginLogic} from "logic.slint";
+
+export {LoginLogic}
+
 export component AppWindow inherits Window {
     width: 800px;
     height: 800px;
     title: "Matrust";
+
     VerticalLayout {
         alignment: center;
-        LoginWindow {
+        loginButton := LoginWindow {
 
         }
     }

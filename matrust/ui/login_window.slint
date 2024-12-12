@@ -1,10 +1,10 @@
 import { Button, VerticalBox, LineEdit} from "std-widgets.slint";
+import {LoginLogic} from "logic.slint";
 
-export component LoginWindow inherits Window {
-    width: 400px;
-    height: 400px;
+
+export component LoginWindow inherits Dialog {
     title: "Matrust";
-    callback login(string, string, string);
+    //callback login(string, string, string);
     VerticalLayout {
         padding: 5px;
         spacing: 10px;
@@ -12,14 +12,12 @@ export component LoginWindow inherits Window {
 
         serverEdit := LineEdit {
             font-size: 14px;
-            min-width: parent.width;
             height: 30px;
             text: "";
             placeholder-text: "Server";
         }
         userEdit := LineEdit {
             font-size: 14px;
-            min-width: parent.width;
             height: 30px;
             text: "";
             placeholder-text: "Username";
@@ -30,7 +28,6 @@ export component LoginWindow inherits Window {
             placeholder-text: "Password";
             text: "";
             input-type: password;
-            min-width: parent.width;
         }
         HorizontalLayout {
             alignment: center;
@@ -39,7 +36,8 @@ export component LoginWindow inherits Window {
                 width: 50px;
                 height: 30px;
                 clicked => {
-                    login(serverEdit.text, userEdit.text, passwordEdit.text)
+                    //login(serverEdit.text, userEdit.text, passwordEdit.text)
+                    LoginLogic.login(serverEdit.text, userEdit.text, passwordEdit.text);
                 }
             }
         }
