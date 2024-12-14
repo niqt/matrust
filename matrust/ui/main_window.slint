@@ -2,6 +2,7 @@ import { Button, VerticalBox, LineEdit } from "std-widgets.slint";
 import { LoginWindow } from "login_window.slint";
 
 import {LoginLogic} from "logic.slint";
+import { ChatWindow } from "chat_window.slint";
 
 export {LoginLogic}
 
@@ -9,11 +10,14 @@ export component AppWindow inherits Window {
     width: 800px;
     height: 800px;
     title: "Matrust";
-
+    in-out property <bool> logged: false;
     VerticalLayout {
         alignment: center;
         loginButton := LoginWindow {
-
+            visible: !logged;
+        }
+        ChatWindow {
+            visible: logged;
         }
     }
 }

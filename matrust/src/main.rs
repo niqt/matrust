@@ -5,8 +5,9 @@ use std::{
     io::{self, Write},
     process::exit,
 };
-
+use std::sync::Arc;
 use anyhow::anyhow;
+use tokio::sync::Mutex;
 use matrix_sdk::{
     config::SyncSettings,
     ruma::events::room::member::StrippedRoomMemberEvent,
@@ -35,12 +36,12 @@ slint::include_modules!();
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     let ui = AppWindow::new().expect("Failed to create AppWindow");
+    let weak = ui.as_weak();
     ui.global::<LoginLogic>().on_login({
-        //let ui_handle = ui.as_weak();
-        move |server, username, password| {
-            //let ui = ui_handle.unwrap()
 
-            tokio::spawn(async move {
+        move |server, username, password| {
+            let ui = weak.unwrap();
+            slint::spawn_local(async move {
                 let url = server.to_string();
                 match login_and_sync_with_password(url, username.to_string(), password.to_string())
                     .await
@@ -48,6 +49,7 @@ async fn main() -> anyhow::Result<()> {
                     Ok(client) => {
                         // Handle successful login
                         println!("Login successful");
+                        ui.set_logged(true);
                         // You might want to update UI here if needed
                         // Now that we are logged in, we can sync and listen to new messages.
                         client.add_event_handler(|ev: SyncRoomMessageEvent| async move {
@@ -66,7 +68,7 @@ async fn main() -> anyhow::Result<()> {
                         println!("Login failed: {}", e);
                     }
                 }
-            });
+            }).unwrap();
         }
     });
 
@@ -108,6 +110,7 @@ async fn on_stripped_state_member(
         println!("Successfully joined room {}", room.room_id());
     });
 }
+
 
 async fn login_and_sync_with_password(
     homeserver_url: String,
