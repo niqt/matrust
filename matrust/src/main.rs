@@ -1,13 +1,4 @@
-use std::{
-    env,
-    error::Error,
-    fmt,
-    io::{self, Write},
-    process::exit,
-};
-use std::sync::Arc;
 use anyhow::anyhow;
-use tokio::sync::Mutex;
 use matrix_sdk::{
     config::SyncSettings,
     ruma::events::room::member::StrippedRoomMemberEvent,
@@ -18,6 +9,15 @@ use matrix_sdk::{
     },
     Client, Room, RoomState,
 };
+use std::sync::Arc;
+use std::{
+    env,
+    error::Error,
+    fmt,
+    io::{self, Write},
+    process::exit,
+};
+use tokio::sync::Mutex;
 use tokio::time::{sleep, Duration};
 use url::Url;
 
@@ -38,40 +38,41 @@ async fn main() -> anyhow::Result<()> {
     let ui = AppWindow::new().expect("Failed to create AppWindow");
     let weak = ui.as_weak();
     ui.global::<LoginLogic>().on_login({
-
+        let weak = weak.clone();
         move |server, username, password| {
-            let ui = weak.unwrap();
-            slint::spawn_local(async move {
+            let weak = weak.clone();
+            tokio::spawn(async move {
                 let url = server.to_string();
-                match login_and_sync_with_password(url, username.to_string(), password.to_string())
-                    .await
-                {
+                match login_and_sync_with_password(url, username.to_string(), password.to_string()).await {
                     Ok(client) => {
-                        // Handle successful login
                         println!("Login successful");
-                        ui.set_logged(true);
-                        // You might want to update UI here if needed
-                        // Now that we are logged in, we can sync and listen to new messages.
-                        client.add_event_handler(|ev: SyncRoomMessageEvent| async move {
-                            println!("Received a message {:?}", ev);
-                        });
+                        slint::invoke_from_event_loop(move || {
+                            let ui = weak.upgrade().expect("Failed to upgrade weak reference");
+                            ui.set_logged(true);
+                        })
+                            .expect("Failed to invoke from event loop");
+                        // Set up event handlers
                         client.add_event_handler(on_room_message);
                         client.add_event_handler(on_stripped_state_member);
-                        // This will sync until an error happens or the program is killed.
-                        if let Err(e) = client.sync(SyncSettings::default()).await {
-                            eprintln!("Sync error: {}", e);
+                        // Start syncing
+                        match client.sync(SyncSettings::default()).await {
+                            Ok(_) => println!("Sync completed successfully"),
+                            Err(e) => eprintln!("Sync error: {}", e),
                         }
-                        println!("Exiting");
                     }
                     Err(e) => {
-                        // Handle login error
-                        println!("Login failed: {}", e);
+                        let error_message = format!("Login failed: {}", e);
+                        eprintln!("{}", error_message);
+                        slint::invoke_from_event_loop(move || {
+                            let ui = weak.upgrade().expect("Failed to upgrade weak reference");
+                            //ui.invoke_login_error(error_message);
+                        })
+                            .expect("Failed to invoke from event loop");
                     }
                 }
-            }).unwrap();
+            });
         }
     });
-
     ui.run()?;
     Ok(())
 }
@@ -110,7 +111,6 @@ async fn on_stripped_state_member(
         println!("Successfully joined room {}", room.room_id());
     });
 }
-
 
 async fn login_and_sync_with_password(
     homeserver_url: String,

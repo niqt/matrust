@@ -14,10 +14,11 @@ export component AppWindow inherits Window {
     VerticalLayout {
         alignment: center;
         loginButton := LoginWindow {
-            visible: !logged;
+           visible: !logged;
         }
-        ChatWindow {
-            visible: logged;
-        }
+
+    }
+    ChatWindow {
+        visible: logged;
     }
 }

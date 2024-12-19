@@ -15,7 +15,8 @@ url = "2.5.0"
 matrix-sdk = { path = "../matrix-rust-sdk/crates/matrix-sdk", features = [
     "sso-login",
 ] }
-slint = "1.8.0"
+slint = "1.9.0"
+async-compat = "0.2.4"
 
 [lints]
 workspace = true
@@ -24,4 +25,4 @@ workspace = true
 release = false
 
 [build-dependencies]
-slint-build = "1.8.0"
+slint-build = "1.9.0"
