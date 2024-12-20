@@ -1,12 +1,12 @@
-import { ScrollView } from "std-widgets.slint";
+import { ScrollView, StandardListView } from "std-widgets.slint";
 
 import { ListView } from "std-widgets.slint";
 export component Users  inherits Window {
     width: 150px;
-    height: 150px;
-    ListView {
+    height: 750px;
+    /*ListView {
         width: 150px;
-        height: 150px;
+        height: 750px;
         for data in [
             { text: "Blue", color: #0000ff, bg: #eeeeee},
             { text: "Red", color: #ff0000, bg: #eeeeee},
@@ -26,5 +26,11 @@ export component Users  inherits Window {
                 color: data.color;
             }
         }
+    }*/
+    StandardListView {
+            model: [ { text: "Blue"}, { text: "Red" }, { text: "Green" },
+                { text: "Yellow" }, { text: "Black"}, { text: "White"},
+                { text: "Magenta" }, { text: "Cyan" },
+            ];
     }
 }

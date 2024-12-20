@@ -43,14 +43,16 @@ async fn main() -> anyhow::Result<()> {
             let weak = weak.clone();
             tokio::spawn(async move {
                 let url = server.to_string();
-                match login_and_sync_with_password(url, username.to_string(), password.to_string()).await {
+                match login_and_sync_with_password(url, username.to_string(), password.to_string())
+                    .await
+                {
                     Ok(client) => {
                         println!("Login successful");
                         slint::invoke_from_event_loop(move || {
                             let ui = weak.upgrade().expect("Failed to upgrade weak reference");
                             ui.set_logged(true);
                         })
-                            .expect("Failed to invoke from event loop");
+                        .expect("Failed to invoke from event loop");
                         // Set up event handlers
                         client.add_event_handler(on_room_message);
                         client.add_event_handler(on_stripped_state_member);
@@ -67,7 +69,7 @@ async fn main() -> anyhow::Result<()> {
                             let ui = weak.upgrade().expect("Failed to upgrade weak reference");
                             //ui.invoke_login_error(error_message);
                         })
-                            .expect("Failed to invoke from event loop");
+                        .expect("Failed to invoke from event loop");
                     }
                 }
             });
@@ -148,13 +150,11 @@ async fn on_room_message(event: OriginalSyncRoomMessageEvent, room: Room) {
         return;
     }
 
-    println!("In on_room_message2");
     // We only want to log text messages.
     let MessageType::Text(msgtype) = &event.content.msgtype else {
         return;
     };
 
-    println!("In on_room_message3");
     let member = room
         .get_member(&event.sender)
         .await
