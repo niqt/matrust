@@ -1,43 +1,31 @@
-import { ScrollView } from "std-widgets.slint";
+import { ListView, VerticalBox } from "std-widgets.slint";
+import {LoginLogic} from "logic.slint";
 
 export component Chat {
-    width: 800px;
+    width: 400px;
     height: 800px;
-    ScrollView {
-        width: 800px;
-        height: 800px;
-        viewport-width: 300px;
-        viewport-height: 800px;
-        Rectangle {
-            width: 30px;
-            height: 30px;
-            x: 275px;
-            y: 50px;
-            background: blue;
-        }
-
-        Rectangle {
-            width: 30px;
-            height: 30px;
-            x: 175px;
-            y: 130px;
-            background: red;
-        }
-
-        Rectangle {
-            width: 30px;
-            height: 30px;
-            x: 25px;
-            y: 210px;
-            background: yellow;
-        }
-
-        Rectangle {
-            width: 30px;
-            height: 30px;
-            x: 98px;
-            y: 55px;
-            background: orange;
+    VerticalBox {
+      padding: 5px;
+        ListView {
+            for data in [
+                { text: "Blue", color: #0000ff, bg: #eeeeee},
+                { text: "Red", color: #ff0000, bg: #eeeeee},
+                { text: "Green", color: #00ff00, bg: #eeeeee},
+                { text: "Yellow", color: #ffff00, bg: #222222 },
+                { text: "Black", color: #000000, bg: #eeeeee },
+                { text: "White", color: #ffffff, bg: #222222 },
+                { text: "Magenta", color: #ff00ff, bg: #eeeeee },
+                { text: "Cyan", color: #00ffff, bg: #222222 },
+            ] : Rectangle {
+                height: 30px;
+                background: data.bg;
+                width: parent.width;
+                Text {
+                    x: 0;
+                    text: data.text;
+                    color: data.color;
+                }
+            }
         }
     }
 }
