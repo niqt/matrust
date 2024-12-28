@@ -13,9 +13,9 @@ tower = { version = "0.4", features = ["full"] }
 tokio = { version = "1", features = ["full"] }
 url = "2.5.0"
 matrix-sdk = { path = "../matrix-rust-sdk/crates/matrix-sdk", features = [
-    "sso-login",
+  "sso-login",
 ] }
-slint = "1.9.0"
+slint = "1.9.1"
 async-compat = "0.2.4"
 
 [lints]
@@ -25,4 +25,4 @@ workspace = true
 release = false
 
 [build-dependencies]
-slint-build = "1.9.0"
+slint-build = "1.9.1"

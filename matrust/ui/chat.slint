@@ -1,29 +1,40 @@
-import { ListView, VerticalBox } from "std-widgets.slint";
+import { ListView, VerticalBox, HorizontalBox, Button } from "std-widgets.slint";
 import {LoginLogic} from "logic.slint";
+
+
+@rust-attr(derive(serde::Serialize, serde::Deserialize))
+export struct Message  {
+    text: string,
+    userName: string,
+}
 
 export component Chat {
     width: 400px;
     height: 800px;
+    in property <[Message]> message-model: [];
     VerticalBox {
       padding: 5px;
         ListView {
-            for data in [
-                { text: "Blue", color: #0000ff, bg: #eeeeee},
-                { text: "Red", color: #ff0000, bg: #eeeeee},
-                { text: "Green", color: #00ff00, bg: #eeeeee},
-                { text: "Yellow", color: #ffff00, bg: #222222 },
-                { text: "Black", color: #000000, bg: #eeeeee },
-                { text: "White", color: #ffffff, bg: #222222 },
-                { text: "Magenta", color: #ff00ff, bg: #eeeeee },
-                { text: "Cyan", color: #00ffff, bg: #222222 },
-            ] : Rectangle {
+            for data in message-model: Rectangle {
                 height: 30px;
-                background: data.bg;
+                //background: data.bg;
                 width: parent.width;
                 Text {
                     x: 0;
                     text: data.text;
-                    color: data.color;
+                }
+            }
+        }
+        HorizontalBox {
+            padding: 5px;
+            chatText := TextInput {
+                width: 300px;
+            }
+            button := Button {
+                text: "Send";
+                clicked => {
+                  LoginLogic.sendMessage(chatText.text);
+                  message-model.push({text: chatText.text, userName: "Me"});
                 }
             }
         }
