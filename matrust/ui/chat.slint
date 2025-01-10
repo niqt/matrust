@@ -2,7 +2,7 @@ import { ListView, VerticalBox, HorizontalBox, Button } from "std-widgets.slint"
 import {LoginLogic} from "logic.slint";
 
 
-@rust-attr(derive(serde::Serialize, serde::Deserialize))
+//@rust-attr(derive(serde::Serialize, serde::Deserialize))
 export struct Message  {
     text: string,
     userName: string,
@@ -34,7 +34,7 @@ export component Chat {
                 text: "Send";
                 clicked => {
                   LoginLogic.sendMessage(chatText.text);
-                  message-model.push({text: chatText.text, userName: "Me"});
+                  //message-model.push({text: chatText.text, userName: "Me"});
                 }
             }
         }

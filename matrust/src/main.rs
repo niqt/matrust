@@ -9,7 +9,9 @@ use matrix_sdk::{
     },
     Client, Room, RoomState,
 };
-use std::sync::Arc;
+use slint::PlatformError;
+use std::sync::Once;
+use std::{borrow::BorrowMut, sync::Arc};
 use std::{
     env,
     error::Error,
@@ -17,10 +19,15 @@ use std::{
     io::{self, Write},
     process::exit,
 };
-use tokio::sync::Mutex;
+//use tokio::sync::Mutex;
+use once_cell::sync::Lazy;
+use slint::Weak;
+use std::cell::OnceCell;
+use std::sync::{Mutex, MutexGuard};
 use tokio::time::{sleep, Duration};
 use url::Url;
 
+//use lazy_static::lazy_static;
 /// The initial device name when logging in with a device for the first time.
 const INITIAL_DEVICE_DISPLAY_NAME: &str = "login client";
 
@@ -33,10 +40,26 @@ const INITIAL_DEVICE_DISPLAY_NAME: &str = "login client";
 
 slint::include_modules!();
 
+static UI_HANDLE: Lazy<Mutex<Option<Weak<AppWindow>>>> = Lazy::new(|| Mutex::new(None));
+
+fn with_ui<F>(f: F)
+where
+    F: FnOnce(&AppWindow),
+{
+    if let Some(ui_weak) = UI_HANDLE.lock().unwrap().as_ref() {
+        if let Some(ui) = ui_weak.upgrade() {
+            f(&ui);
+        }
+    }
+}
+
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    let ui = AppWindow::new().expect("Failed to create AppWindow");
+    let ui = AppWindow::new().unwrap();
+    *UI_HANDLE.lock().unwrap() = Some(ui.as_weak());
+
     let weak = ui.as_weak();
+
     ui.global::<LoginLogic>().on_login({
         let weak = weak.clone();
         move |server, username, password| {
@@ -75,7 +98,7 @@ async fn main() -> anyhow::Result<()> {
             });
         }
     });
-    ui.run()?;
+    ui.run();
     Ok(())
 }
 
@@ -161,6 +184,14 @@ async fn on_room_message(event: OriginalSyncRoomMessageEvent, room: Room) {
         .expect("Couldn't get the room member")
         .expect("The room member doesn't exist");
     let name = member.name();
+
+    slint::invoke_from_event_loop(move || {
+        with_ui(|ui| {
+            println!("qua");
+            ui.set_logged(false);
+        });
+    })
+    .expect("Failed to update UI");
 
     println!("{name}: {}", msgtype.body);
 }
