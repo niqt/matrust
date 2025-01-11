@@ -9,7 +9,7 @@ use matrix_sdk::{
     },
     Client, Room, RoomState,
 };
-use slint::PlatformError;
+use slint::{Model, ModelRc, PlatformError, VecModel};
 use std::sync::Once;
 use std::{borrow::BorrowMut, sync::Arc};
 use std::{
@@ -23,6 +23,7 @@ use std::{
 use once_cell::sync::Lazy;
 use slint::Weak;
 use std::cell::OnceCell;
+use std::rc::Rc;
 use std::sync::{Mutex, MutexGuard};
 use tokio::time::{sleep, Duration};
 use url::Url;
@@ -39,6 +40,7 @@ const INITIAL_DEVICE_DISPLAY_NAME: &str = "login client";
 /// use std::error::Error;
 
 slint::include_modules!();
+
 
 static UI_HANDLE: Lazy<Mutex<Option<Weak<AppWindow>>>> = Lazy::new(|| Mutex::new(None));
 
@@ -185,10 +187,19 @@ async fn on_room_message(event: OriginalSyncRoomMessageEvent, room: Room) {
         .expect("The room member doesn't exist");
     let name = member.name();
 
+    let n = name.to_string();
+    let m = msgtype.body.clone();
     slint::invoke_from_event_loop(move || {
         with_ui(|ui| {
-            println!("qua");
-            ui.set_logged(false);
+            let mut messages: Vec<Message> = ui.get_message_model().iter().collect();
+
+            // Create and add new message
+            let msg: Message = Message {
+                user: n.into(),
+                text: m.into(),
+            };
+            messages.push(msg);
+            ui.set_message_model(slint::VecModel::from_slice(&messages));
         });
     })
     .expect("Failed to update UI");

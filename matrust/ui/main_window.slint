@@ -1,9 +1,9 @@
-import { Button, VerticalBox, LineEdit } from "std-widgets.slint";
+import { Button, VerticalBox, LineEdit, ListView } from "std-widgets.slint";
 import { LoginWindow } from "login_window.slint";
 
 import {LoginLogic} from "logic.slint";
 import { ChatWindow } from "chat_window.slint";
-
+import { Message } from "chat_types.slint"; 
 export {LoginLogic}
 
 export component AppWindow inherits Window {
@@ -11,6 +11,7 @@ export component AppWindow inherits Window {
     height: 800px;
     title: "Matrust";
     in-out property <bool> logged: false;
+    in property <[Message]> message-model: [{user:"username", text:"testo"}];
     VerticalLayout {
         alignment: center;
         loginButton := LoginWindow {
@@ -20,5 +21,6 @@ export component AppWindow inherits Window {
     }
     ChatWindow {
         visible: logged;
+        message-model: message-model;
     }
 }

@@ -1,12 +1,13 @@
 import { ListView, VerticalBox, HorizontalBox, Button } from "std-widgets.slint";
 import {LoginLogic} from "logic.slint";
-
+import { Message } from "chat_types.slint"; 
 
 //@rust-attr(derive(serde::Serialize, serde::Deserialize))
-export struct Message  {
+/*export struct Message  {
     text: string,
     userName: string,
-}
+}*/
+
 
 export component Chat {
     width: 400px;
