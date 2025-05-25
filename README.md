@@ -1,0 +1,2 @@
+# matrust
+Matrix Rust Client
