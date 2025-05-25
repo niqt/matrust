@@ -1,0 +1,18 @@
+import { ScrollView, StandardListView } from "std-widgets.slint";
+import { ListView } from "std-widgets.slint";
+import {LoginLogic} from "logic.slint";
+
+export component Users  inherits Window {
+    width: 150px;
+    height: 750px;
+    StandardListView {
+            model: [ { text: "Blue"}, { text: "Red" }, { text: "Green" },
+                { text: "Yellow" }, { text: "Black"}, { text: "White"},
+                { text: "Magenta" }, { text: "Cyan" },
+            ];
+        current-item-changed(index) => {
+          debug("Current item: ", self.model[index].text);
+          LoginLogic.userSelected(self.model[index].text); 
+        }
+    }
+}

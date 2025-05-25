@@ -1,0 +1,43 @@
+import { ListView, VerticalBox, HorizontalBox, Button } from "std-widgets.slint";
+import {LoginLogic} from "logic.slint";
+import { Message } from "chat_types.slint"; 
+
+//@rust-attr(derive(serde::Serialize, serde::Deserialize))
+/*export struct Message  {
+    text: string,
+    userName: string,
+}*/
+
+
+export component Chat {
+    width: 400px;
+    height: 800px;
+    in property <[Message]> message-model: [];
+    VerticalBox {
+      padding: 5px;
+        ListView {
+            for data in message-model: Rectangle {
+                height: 30px;
+                //background: data.bg;
+                width: parent.width;
+                Text {
+                    x: 0;
+                    text: data.text;
+                }
+            }
+        }
+        HorizontalBox {
+            padding: 5px;
+            chatText := TextInput {
+                width: 300px;
+            }
+            button := Button {
+                text: "Send";
+                clicked => {
+                  LoginLogic.sendMessage(chatText.text);
+                  //message-model.push({text: chatText.text, userName: "Me"});
+                }
+            }
+        }
+    }
+}

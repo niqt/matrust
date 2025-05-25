@@ -1,0 +1,18 @@
+
+import { Users } from "users.slint";
+import { Chat } from "chat.slint";
+
+import { Message } from "chat_types.slint"; 
+
+export component ChatWindow inherits Window{
+    in property <[Message]> message-model: [];
+        HorizontalLayout {
+            Users {
+
+            }
+
+            Chat {
+              message-model: message-model;          
+            }
+        }
+}
