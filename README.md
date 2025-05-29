@@ -9,6 +9,11 @@ The goal of this project is to create a Matrix client in Rust using the matrix-s
 
 To get started, you need to have Rust and Cargo installed on your system. You can download them from the official Rust website: https://www.rust-lang.org/tools/install
 
+Also you have to install the development library of SQLite. On Debian-like systems this can be done with:
+```
+sudo apt install libsqlite3-dev
+```
+
 ## Current Features
 
 - Login
